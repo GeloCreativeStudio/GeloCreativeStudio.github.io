@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+  <script src="api.js"></script>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="img/logo-white.png" type="image/png">
+  <title>Gelo Creative Studio's Image Generator</title>
+</head>
+
+<body class="max-w-4xl mx-auto">
+  <div class="flex flex-col justify-center px-4 pt-12 sm:px-6 lg:px-8">
+    <div class="text-center">
+      <img src="img/logo with label-white.png" alt="Image Generator" class="mx-auto mb-10" style="max-width: 150px;" />
+      <p class="text-md lg:text-xl mb-10">
+        Unlock Your Creativity with Gelo Creative Studio's Image Generator—a groundbreaking tool crafted by
+        <a href="https://gelocreativestudio.github.io/" class="font-semibold">Gelo Creative Studio.</a>
+        Whether you're an experienced creator or a novice explorer, effortlessly craft captivating visuals by simply describing your vision or inputting a keyword.
+      </p>
+    </div>
+    <div class="bg-white shadow-md rounded-lg px-8 pt-6 pb-8 mb-4 flex flex-col my-2">
+      <div class="mb-4 flex flex-col gap-2">
+        <p class="text-gray-500" style="text-align: center; padding-bottom: 2%; font-weight: bold;">This currently represents a prototype application, with plans to unveil the Beta version next month.</p>
+        <label for="password" class="text-gray-600">Password</label>
+        <input type="password" id="password" class="input-style" placeholder="Enter password" />
+        <label for="text" class="text-gray-600">Description or Keyword</label>
+        <textarea id="text" class="input-style"
+          placeholder="Enter a short description of the image or a keyword"></textarea>
+        <label for="sizeSelect" class="text-gray-600">Image Size</label>
+        <select id="sizeSelect" class="input-style"></select>
+      </div>
+      <div class="mt-2 text-right">
+        <button id="btn" class="button-style">Generate</button>
+      </div>
+      <div id="loading" class="hidden flex justify-center items-center mt-10">
+        <svg class="animate-spin h-10 w-10 text-gray-500" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647zm11-2.647A7.962 7.962 0 0120 12h-4c0 3.042-1.135 5.824-3 7.938l-3-2.647z">
+          </path>
+        </svg>
+      </div>
+      <div id="image" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-10"></div>
+    </div>
+  </div>
+  <footer class="text-center mt-10 border-t-2 border-gray-200 py-4" id="checkAuthor">
+    <p class="text-sm">
+      © 2023 Develop by
+      <a href="https://github.com/GeloCreativeStudio" class="font-semibold">@GeloCreativeStudio</a>
+    </p>
+  </footer>
+</body>
+
+<script>
+  const url = "https://api.openai.com/v1/images/generations";
+  const text = document.getElementById("text");
+  const image = document.getElementById("image");
+  const btn = document.getElementById("btn");
+  const sizeSelect = document.getElementById("sizeSelect");
+  const loadingSpinner = document.getElementById("loading");
+
+  const apiDiv = document.getElementsByClassName("apiDiv");
+  const passwordInput = document.getElementById("password");
+
+  const apiKey = "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";
+
+  const sizeOptions = ["Square", "Portrait", "Landscape"];
+  const optionsFragment = document.createDocumentFragment();
+
+  sizeOptions.forEach((size) => {
+    const option = document.createElement("option");
+    option.value = size;
+    option.textContent = size;
+    optionsFragment.appendChild(option);
+  });
+
+  sizeSelect.appendChild(optionsFragment);
+
+  let imageSizes = sizeSelect.value;
+
+  function generateImage() {
+    const password = passwordInput.value.trim();
+    if (password !== "gelolovesai") {
+      alert("Incorrect password. Please try again.");
+      return;
+    }
+
+    loadingSpinner.classList.remove("hidden");
+    btn.disabled = true;
+
+    let sizeString;
+    if (imageSizes === "square") {
+      sizeString = "1024x1024";
+    } else if (imageSizes === "portrait") {
+      sizeString = "1024x1792";
+    } else if (imageSizes === "landscape") {
+      sizeString = "1792x1024";
+    }
+
+    const data = {
+      quality: "standard",
+      model: "dall-e-3",
+      prompt: text.value,
+      size: sizeString,
+    };
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + apiKey,
+      },
+      body: JSON.stringify(data),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        loadingSpinner.classList.add("hidden");
+        btn.disabled = false;
+
+        data.data.forEach((item) => {
+          const img = document.createElement("img");
+          img.src = item.url;
+          img.alt = "image";
+          img.classList.add(
+            "w-full",
+            "h-auto",
+            "rounded-lg",
+            "shadow-lg",
+            "hover:shadow-2xl",
+            "transition",
+            "duration-500",
+            "ease-in-out",
+            "transform",
+            "hover:-translate-y-1",
+            "hover:scale-103"
+          );
+
+          image.appendChild(img);
+
+          // Double-click event listener
+          img.addEventListener("dblclick", () => {
+            downloadImage(item.url);
+          });
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+        loadingSpinner.classList.add("hidden");
+        btn.disabled = false;
+        alert("Something went wrong. Please try again.");
+      });
+  }
+
+  const checkAuthor = document.getElementById("checkAuthor");
+  if (checkAuthor.children[0].children[0].textContent !== "@GeloCreativeStudio") {
+    window.location.href = "https://github.com/GeloCreativeStudio";
+  }
+
+  sizeSelect.addEventListener("change", function () {
+    imageSizes = sizeSelect.value;
+  });
+
+  btn.addEventListener("click", generateImage);
+
+  function downloadImage(url) {
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = document.getElementById("text").value.split(" ").join("_") + ".png";
+    link.target = "_blank";
+    link.click();
+  }
+</script>
+
+</html>
