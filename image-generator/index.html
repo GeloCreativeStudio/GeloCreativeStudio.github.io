@@ -91,11 +91,11 @@
     btn.disabled = true;
 
     let sizeString;
-    if (imageSizes === "square") {
+    if (imageSizes === "Square") {
       sizeString = "1024x1024";
-    } else if (imageSizes === "portrait") {
+    } else if (imageSizes === "Portrait") {
       sizeString = "1024x1792";
-    } else if (imageSizes === "landscape") {
+    } else if (imageSizes === "Landscape") {
       sizeString = "1792x1024";
     }
 
@@ -110,7 +110,7 @@
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer ${{ secrets.OPENAI_API_KEY }}",
+        Authorization: "Bearer " + "${{ secrets.OPENAI_API_KEY }}",
       },
       body: JSON.stringify(data),
     })
