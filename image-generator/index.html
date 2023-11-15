@@ -66,8 +66,6 @@
   const apiDiv = document.getElementsByClassName("apiDiv");
   const passwordInput = document.getElementById("password");
 
-  const apiKey = "${{ secrets.OPENAI_API_KEY }}";
-
   const sizeOptions = ["Square", "Portrait", "Landscape"];
   const optionsFragment = document.createDocumentFragment();
 
@@ -112,7 +110,7 @@
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + apiKey,
+        Authorization: "Bearer " + "${{ secrets.OPENAI_API_KEY }}",
       },
       body: JSON.stringify(data),
     })
