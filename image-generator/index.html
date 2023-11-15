@@ -7,7 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
   <script src="api.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dotenv@10.0.0/dist/main.min.js"></script>
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" href="img/logo-white.png" type="image/png">
   <title>Gelo Creative Studio's Image Generator</title>
@@ -25,9 +24,8 @@
     </div>
     <div class="bg-white shadow-md rounded-lg px-8 pt-6 pb-8 mb-4 flex flex-col my-2">
       <div class="mb-4 flex flex-col gap-2">
-        <p class="text-gray-500" style="text-align: center; padding-bottom: 2%; font-weight: bold;">This currently represents a prototype application, with plans to unveil the Beta version next month.</p>
-        <label for="password" class="text-gray-600">Password</label>
-        <input type="password" id="password" class="input-style" placeholder="Enter password" />
+        <label for="api" class="text-gray-600 apiDiv">API Key</label>
+        <input type="text" id="api" class="input-style apiDiv" placeholder="Enter API key here" />
         <label for="text" class="text-gray-600">Description or Keyword</label>
         <textarea id="text" class="input-style"
           placeholder="Enter a short description of the image or a keyword"></textarea>
@@ -50,26 +48,21 @@
   </div>
   <footer class="text-center mt-10 border-t-2 border-gray-200 py-4" id="checkAuthor">
     <p class="text-sm">
-      © 2023 Develop by
+      Develop by
       <a href="https://github.com/GeloCreativeStudio" class="font-semibold">@GeloCreativeStudio</a>
     </p>
   </footer>
 </body>
 
 <script>
-  dotenv.config();
   const url = "https://api.openai.com/v1/images/generations";
   const text = document.getElementById("text");
   const image = document.getElementById("image");
   const btn = document.getElementById("btn");
   const sizeSelect = document.getElementById("sizeSelect");
   const loadingSpinner = document.getElementById("loading");
-
   const apiDiv = document.getElementsByClassName("apiDiv");
-  const passwordInput = document.getElementById("password");
-
-  const apiKey = process.env.OPENAI_API_KEY;
-
+  const apiInput = document.getElementById("api");
 
   const sizeOptions = ["Square", "Portrait", "Landscape"];
   const optionsFragment = document.createDocumentFragment();
@@ -84,11 +77,20 @@
   sizeSelect.appendChild(optionsFragment);
 
   let imageSizes = sizeSelect.value;
+  let apiKey = "";
 
   function generateImage() {
-    const password = passwordInput.value.trim();
-    if (password !== "gelolovesai") {
-      alert("Incorrect password. Please try again.");
+    if (apiKey === "") {
+      apiKey = apiInput.value.trim() || api;
+      if (apiKey === "") {
+        alert("Please enter your OpenAI API key");
+        return;
+      }
+      apiDiv[0].classList.add("hidden");
+      apiDiv[1].classList.add("hidden");
+    }
+    if (text.value === "") {
+      alert("Please enter a value");
       return;
     }
 
@@ -105,6 +107,8 @@
     }
 
     const data = {
+      model:"dall-e-3",
+      quality:"standard",
       prompt: text.value,
       size: sizeString,
     };
@@ -161,6 +165,16 @@
   if (checkAuthor.children[0].children[0].textContent !== "@GeloCreativeStudio") {
     window.location.href = "https://github.com/GeloCreativeStudio";
   }
+
+  text.addEventListener("input", function () {
+    if (text.value === "") {
+      btn.classList.remove("bg-slate-900", "text-slate-50");
+      text.classList.add("border-r-2", "border-gray-200");
+    } else {
+      text.classList.remove("border-r-2", "border-gray-200");
+      btn.classList.add("bg-slate-900", "text-slate-50");
+    }
+  });
 
   sizeSelect.addEventListener("change", function () {
     imageSizes = sizeSelect.value;
