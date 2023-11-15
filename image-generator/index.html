@@ -110,7 +110,7 @@
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + "${{ secrets.OPENAI_API_KEY }}",
+        Authorization: "Bearer ${{ secrets.OPENAI_API_KEY }}",
       },
       body: JSON.stringify(data),
     })
